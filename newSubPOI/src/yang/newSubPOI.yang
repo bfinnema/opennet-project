@@ -1,0 +1,98 @@
+module newSubPOI {
+
+  namespace "http://example.com/newSubPOI";
+  prefix newSubPOI;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "OpenNET. Provisioning of a new customer in a PoI area";
+
+  revision 2019-02-17 {
+    description
+      "Adding sp_id in order to do Service Provider bridge group.";
+  }
+
+  revision 2019-01-31 {
+    description
+      "Adding the Remote POI capabilities in order to be able to do service assurance.";
+  }
+
+  revision 2018-12-22 {
+    description
+      "Initial revision. Replaces newCuPy-poi";
+  }
+
+  list newSubPOI {
+    description "This is an RFS skeleton service";
+
+    key subscription_id;
+    leaf subscription_id {
+      tailf:info "Subscription ID = SP ID + Subscriber ID + Service ID";
+      type string;
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint newSubPOI-servicepoint;
+
+    leaf device {
+      tailf:info "PoI Area";
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    leaf cpe_id {
+      tailf:info "A virtual CPE used for the demo";
+      type uint32 {
+        range "1..4";
+      }
+    }
+    leaf PWESubInt {
+      tailf:info "Subinterface ID";
+      type string;
+    }
+    leaf remote_interface {
+      tailf:info "SP Remote POI interface";
+      type string;
+    }
+    leaf sp_id {
+      tailf:info "Service Provider";
+      type string;
+    }
+    leaf QoS_Out {
+      tailf:info "Upstream QoS profile";
+      type string;
+    }
+    leaf QoS_In {
+      tailf:info "Downstream QoS profile";
+      type string;
+    }
+    leaf s_vlan {
+      tailf:info "Provider VLAN (100-3300)";
+      type uint32 {
+        range "100..999";
+      }
+    }
+
+    list c_vlan {
+      key c_vlan_id;
+      description "List of C-VLAN's";
+
+      leaf c_vlan_id {
+        tailf:info "Subscriber VLAN (100-3300)";
+        type uint32 {
+          range "100..999";
+        }
+      }
+    }
+  }
+}

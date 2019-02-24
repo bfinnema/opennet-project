@@ -1,0 +1,11 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <newSubCPE xmlns="http://example.com/newSubCPE">
+        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+        <device>{$DEVICE}</device>
+        <cpe_id>{$CPE_ID}</cpe_id>
+        <vlans>
+            <inner_vlan>{$INNER_VLAN}</inner_vlan>
+            <outer_vlan>{$OUTER_VLAN}</outer_vlan>
+        </vlans>
+    </newSubCPE>
+</config>

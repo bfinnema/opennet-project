@@ -1,0 +1,17 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <open-net-access xmlns="http://example.com/open-net-access">
+    <inventory>
+        <subscribers>
+            <subscriber>
+                <id>{$SUBSCRIBER_ID}</id>
+                <subscriptions>
+                    <subscription>
+                        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+                        <name>{$NAME}</name>
+                    </subscription>
+                </subscriptions>
+            </subscriber>
+        </subscribers>
+    </inventory>
+  </open-net-access>
+</config>

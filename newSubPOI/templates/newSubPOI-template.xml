@@ -1,0 +1,51 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <PW-Ether-subinterface>
+            <PW-Ether>
+              <id>{$PWESUBINT}</id>
+              <l2transport/>
+              <description>Subscription {$SUBSCRIPTION_ID}</description>
+              <service-policy>
+                <input>
+                  <name>{$QOS_IN}</name>
+                </input>
+                <output>
+                  <name>{$QOS_OUT}</name>
+                </output>
+              </service-policy>
+              <rewrite>
+                <ingress>
+                  <tag>
+                    <push/>
+                    <dot1q>{$S_VLAN}</dot1q>
+                    <mode>symmetric</mode>
+                  </tag>
+                </ingress>
+              </rewrite>
+            </PW-Ether>
+          </PW-Ether-subinterface>
+        </interface>
+        <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <bridge>
+            <group>
+              <group-name>{$SP_ID}</group-name>
+              <bridge-domain>
+                <bridge-domain-name>{$S_VLAN}</bridge-domain-name>
+                <interface>
+                  <name>PW-Ether{$PWESUBINT}</name>
+                  <split-horizon>
+                    <group/>
+                  </split-horizon>
+                </interface>
+              </bridge-domain>
+            </group>
+          </bridge>
+        </l2vpn>
+      </config>
+    </device>
+  </devices>
+</config-template>

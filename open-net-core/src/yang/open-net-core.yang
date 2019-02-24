@@ -1,0 +1,122 @@
+module open-net-core {
+
+  namespace "http://example.com/open-net-core";
+  prefix open-net-core;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+  import open-net-access {
+    prefix open-net;
+  }
+
+  revision 2019-01-08 {
+    description
+      "Bo Finnemann. Introduced the PW Sub-interface ID leaf to be able to select that separately by RM";
+  }
+
+  revision 2019-01-02 {
+    description
+      "Bo Finnemann. Introduced multiple nodes per access-area and multiple interfaces per node";
+  }
+
+  revision 2018-12-24 {
+    description
+      "Bo Finnemann added subscriber_id.";
+  }
+
+  revision 2018-12-18 {
+    description
+      "Initial revision.";
+  }
+  augment /open-net:open-net-access {
+    list open-net-core {
+
+      key name;
+      leaf name {
+        tailf:info "Internal NSO name";
+        tailf:cli-allow-range;
+        type string;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint open-net-core-servicepoint;
+
+      leaf subscriber_id {
+        tailf:info "Subscriber ID";
+        type string;
+      }
+
+      leaf pwsubinterface_id {
+        tailf:info "PW Sub-interface ID";
+        type uint32;
+      }
+
+      container vlan_mappings{
+        list vlan_mapping {
+          key "inner_vlan outer_vlan";
+          leaf inner_vlan {
+            type uint32;
+          }
+          leaf outer_vlan {
+            type uint32;
+          }
+        }
+      }
+      
+      leaf sp_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:sps/open-net:sp/open-net:sp_id";
+        }
+      }
+      leaf poi_area_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:poi_areas/open-net:poi_area/open-net:poi_area_id";
+        }
+      }
+      leaf pe_area_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:pe_areas/open-net:pe_area/open-net:pe_area_id";
+        }
+      }
+      leaf service_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:sps/open-net:sp[open-net:sp_id=current()/../sp_id]/open-net:services/open-net:service/open-net:id";
+        }
+      }
+/* 
+      leaf service_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:services/open-net:service/open-net:id";
+        }
+      }
+ */      
+      leaf access_area_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area/open-net:access_area_id";
+        }
+      }
+      leaf access_node_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node/open-net:access_node_id";
+        }
+      }
+      leaf access_if {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node[open-net:access_node_id=current()/../access_node_id]/open-net:interfaces/open-net:interface/open-net:access_if";
+        }
+      }
+      leaf cpe_name {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:cpes/open-net:cpe/open-net:cpe_name";
+        }
+      }
+    }
+  } 
+}

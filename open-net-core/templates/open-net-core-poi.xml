@@ -1,0 +1,15 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <newSubPOI xmlns="http://example.com/newSubPOI">
+        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+        <device>{$DEVICE}</device>
+        <cpe_id>{$CPE_ID}</cpe_id>
+        <PWESubInt>{$PWESUBINT}</PWESubInt>
+        <remote_interface>{$REMOTEINT}</remote_interface>
+        <QoS_Out>{$QOS_OUT}</QoS_Out>
+        <QoS_In>{$QOS_IN}</QoS_In>
+        <s_vlan>{$S_VLAN}</s_vlan>
+        <c_vlan>
+            <c_vlan_id>{$C_VLAN}</c_vlan_id>
+        </c_vlan>
+    </newSubPOI>
+</config>

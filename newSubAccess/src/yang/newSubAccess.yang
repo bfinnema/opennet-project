@@ -1,0 +1,91 @@
+module newSubAccess {
+
+  namespace "http://example.com/newSubAccess";
+  prefix newSubAccess;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "OpenNET. Provisioning of a new customer in an access switch";
+
+  revision 2019-01-07 {
+    description
+      "Bo Finnemann. Added subscriber_id";
+  }
+
+  revision 2018-12-22 {
+    description
+      "Initial revision. Replaces newCuPy-access";
+  }
+
+  list newSubAccess {
+    description "This is an RFS skeleton service";
+
+    key subscription_id;
+    leaf subscription_id {
+      tailf:info "Subscription ID = SP ID + Subscriber ID + Service ID";
+      type string;
+    }
+
+    leaf subscriber_id {
+      tailf:info "Subscriber ID to add to the description field of the port";
+      type string;
+    }
+
+    leaf device {
+      tailf:info "Access switch, the Subscriber is connected to";
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint newSubAccess-servicepoint;
+
+    leaf access_interface {
+      tailf:info "Interface Number";
+      type string;
+    }
+
+    leaf mvr_vlan {
+      tailf:info "Multicast VLAN Registration";
+      type uint32 {
+        range "100..999";
+      }
+    }
+
+    leaf mvr_receiver_vlan {
+      tailf:info "Multicast VLAN Registration - Receiver";
+      type uint32 {
+        range "100..999";
+      }
+    }
+
+    list vlan_mappings {
+      key inner_vlan;
+      description "List of the VLAN mappings to perform for a specific subscriber";
+
+      leaf inner_vlan {
+        tailf:info "VLAN to be mapped";
+        type uint32 {
+          range "10..999";
+        }
+      }
+
+      leaf outer_vlan {
+        tailf:info "VLAN to map to";
+        type uint32 {
+          range "100..999";
+        }
+      }
+    }
+  }
+}

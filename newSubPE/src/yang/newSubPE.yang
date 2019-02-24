@@ -1,0 +1,77 @@
+module newSubPE {
+
+  namespace "http://example.com/newSubPE";
+  prefix newSubPE;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "OpenNET. Provisioning of a new customer in a PE";
+
+  revision 2019-02-12 {
+    description
+      "Introduce sp_id and pw_id in order to be able to do bridge group with bridge domain for the SP";
+  }
+
+  revision 2018-12-22 {
+    description
+      "Initial revision. Replaces newCuPy-pe";
+  }
+
+  list newSubPE {
+    description "This is an RFS skeleton service";
+
+    key subscription_id;
+    leaf subscription_id {
+      tailf:info "Subscription ID = SP ID + Subscriber ID + Service ID";
+      type string;
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint newSubPE-servicepoint;
+
+    leaf device {
+      tailf:info "PE Router to serve this Subscriber";
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    leaf pe_interface {
+      tailf:info "Interface Number";
+      type string;
+    }
+
+    leaf sp_id {
+      tailf:info "Service Provider";
+      type string;
+    }
+
+    leaf pw_id {
+      tailf:info "Pseudowire ID";
+      type uint32 {
+        range "100..999";
+      }
+    }
+
+    list vlan {
+      key vlan_id;
+      description "List of the customer VLAN's";
+
+      leaf vlan_id {
+        tailf:info "Customer VLAN";
+        type uint32 {
+          range "100..999";
+        }
+      }
+    }
+  }
+}

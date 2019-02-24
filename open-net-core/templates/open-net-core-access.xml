@@ -1,0 +1,14 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <newSubAccess xmlns="http://example.com/newSubAccess">
+        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+        <subscriber_id>{$SUBSCRIBER_ID}</subscriber_id>
+        <device>{$DEVICE}</device>
+        <access_interface>{$INTERFACE}</access_interface>
+        <mvr_vlan>{$MVR_VLAN}</mvr_vlan>
+        <mvr_receiver_vlan>{$MVR_RECEIVER_VLAN}</mvr_receiver_vlan>
+        <vlan_mappings>
+            <inner_vlan>{$INNER_VLAN}</inner_vlan>
+            <outer_vlan>{$OUTER_VLAN}</outer_vlan>
+        </vlan_mappings>
+    </newSubAccess>
+</config>

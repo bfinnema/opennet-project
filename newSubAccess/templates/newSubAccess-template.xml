@@ -1,0 +1,43 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <interface xmlns="urn:ios">
+          <GigabitEthernet>
+            <name>{$ACCESS_INTERFACE}</name>
+            <description>Subscriber {$SUBSCRIBER_ID}</description>
+            <switchport>
+              <mode>
+                <trunk/>
+              </mode>
+              <vlan>
+                <mapping>
+                  <vlans>
+                    <OriginalVLANIDSOnWire>{$INNER_VLAN}</OriginalVLANIDSOnWire>
+                    <VLANIDTranslated>{$OUTER_VLAN}</VLANIDTranslated>
+                  </vlans>
+                </mapping>
+              </vlan>
+            </switchport>
+            <mvr>
+              <type>receiver</type>
+              <vlan>
+                <id>{$MVR_VLAN}</id>
+                <receiver>
+                  <vlan>
+                    <id>{$MVR_RECEIVER_VLAN}</id>
+                  </vlan>
+                </receiver>
+              </vlan>
+            </mvr>
+            <mtu>1700</mtu>
+            <service-policy>
+              <input>ACCESS-IN</input>
+            </service-policy>
+          </GigabitEthernet>
+        </interface>
+      </config>
+    </device>
+  </devices>
+</config-template>

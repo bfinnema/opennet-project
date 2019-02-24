@@ -1,0 +1,250 @@
+module open-net-access {
+
+  namespace "http://example.com/open-net-access";
+  prefix open-net-access;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "OpenNET Inventory";
+
+  revision 2019-01-31 {
+    description
+      "Bo Finnemann. Added CPE's";
+  }
+
+  revision 2019-01-05 {
+    description
+      "Bo Finnemann. Descriptions of areas";
+  }
+
+  revision 2019-01-02 {
+    description
+      "Bo Finnemann. Changed the access_areas to have multiple nodes per area and multiple interfaces per node.";
+  }
+
+  revision 2019-01-01 {
+    description
+      "Bo Finnemann. Introduced the s_vlan_offset and s_vlan_num.";
+  }
+
+  revision 2018-12-27 {
+    description
+      "Bo Finnemann changed from - to _, changes customer to subscriber and added subscriptions under subscribers.";
+  }
+
+  revision 2018-12-06 {
+    description
+      "Initial revision.";
+  }
+
+  container open-net-access {
+    
+    container inventory {
+      
+      container sps {
+        
+        list sp {
+          uses ncs:service-data;
+          ncs:servicepoint open-net-access-servicepoint;
+          key sp_id;
+          leaf sp_id {
+            tailf:info "Unique SP id";
+            type string;
+          }
+          leaf s_vlan_offset {
+            tailf:info "The S VLAN offset of the SP";
+            type uint32;
+          }
+          leaf mvr_vlan {
+            tailf:info "Multicast VLAN Registration (MVR)";
+            type uint32;
+          }
+/* 
+          leaf mvr_receiver_vlan {
+            tailf:info "Multicast VLAN Registration (MVR), Receiver VLAN";
+            type uint32;
+          }
+ */          
+          leaf-list vlan_range {
+            type uint32;
+          }
+          container services {
+            list service {
+              key id;
+              leaf id {
+                tailf:info "Unique service id";
+                type string;
+              }
+              list vlans {
+                key vlan;
+                description "List of inner VLAN's for this service";
+
+                leaf vlan {
+                  tailf:info "An inner VLAN of the service";
+                  type uint32;
+                }
+                leaf multicast {
+                  tailf:info "Does this vlan carry a multicast service, yes/no";
+                  type boolean;
+                  default false;
+                }
+              }
+              leaf qos_profile_in {
+                type string;
+              }
+              leaf qos_profile_out {
+                type string;
+              }
+              leaf service_description {
+                type string;
+              }
+            }
+          }
+          container vlan_pool {
+            leaf start {
+              tailf:info "Vlan pool start";
+              type uint32;
+            }
+            leaf end {
+              tailf:info "Vlan pool end";
+              type uint32;
+            }
+          }
+        }
+      }
+      container poi_areas{
+        list poi_area {
+          key poi_area_id;
+          leaf poi_area_id {
+            tailf:info "Unique poi area id";
+            type string;
+          }
+          leaf poi_area_description {
+            tailf:info "POI area description";
+            type string;
+          }
+          container node {
+              leaf poi_node_id {
+                type leafref {
+                  path "/ncs:devices/ncs:device/ncs:name";
+                }
+              }
+              leaf poi_if {
+                tailf:info "SP Remote POI interface";
+                type string;
+              }
+            
+          }
+        }
+      }
+      container pe_areas{
+        list pe_area {
+          key pe_area_id;
+          leaf pe_area_id {
+            tailf:info "Unique pe area id";
+            type string;
+          }
+          leaf pe_area_description {
+            tailf:info "PE area description";
+            type string;
+          }
+          container node {
+              leaf pe_node_id {
+                type leafref {
+                  path "/ncs:devices/ncs:device/ncs:name";
+                }
+              }
+              leaf pe_if {
+                tailf:info "PE interface for subinterfaces";
+                type string;
+              }
+          }
+        }
+      }
+      container access_areas{
+        list access_area {
+          key access_area_id;
+          leaf access_area_id {
+            tailf:info "Unique access area id";
+            type string;
+          }
+          leaf access_area_description {
+            tailf:info "Access area description";
+            type string;
+          }
+          container nodes {
+            list node {
+              key access_node_id;
+              leaf access_node_id {
+                type leafref {
+                  path "/ncs:devices/ncs:device/ncs:name";
+                }
+              }
+              container interfaces {
+                list interface {
+                  key access_if;
+                  leaf access_if {
+                    tailf:info "Access interface";
+                    type string;
+                  }
+                }
+              }
+              leaf s_vlan_num {
+                tailf:info "Number to add to the SP VLAN offset";
+                type uint32;
+              }
+            }
+          }
+        }
+      }
+      container subscribers {
+        list subscriber {
+          key id;
+          leaf id {
+            tailf:info "Unique subscriber id";
+            type string;
+          }
+          container subscriptions {
+            list subscription {
+              key subscription_id;
+              leaf subscription_id {
+                type string;
+              }
+              leaf name {
+                type string;
+              }
+            }
+          }
+        }
+      }
+      container cpes {
+        list cpe {
+          key cpe_name;
+          leaf cpe_name {
+            tailf:info "A virtual CPE used for the demo";
+            type string;
+          }
+          leaf cpe_id {
+            tailf:info "Number 1, 2, 3 or 4";
+            type uint32 {
+                range "1..4";
+            }
+          }
+          leaf bdi_ip_address {
+            tailf:info "BDI IP-address";
+            type inet:ipv4-address;
+          }
+        }
+      }
+    }
+  }
+}
