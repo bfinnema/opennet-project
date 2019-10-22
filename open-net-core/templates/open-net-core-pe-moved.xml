@@ -1,0 +1,15 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <moveSubPE xmlns="http://example.com/moveSubPE">
+        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+        <device>{$DEVICE}</device>
+        <sp_id>{$SP_ID}</sp_id>
+        <pw_id>{$ORIGINAL_S_VLAN}</pw_id>
+        <vlans>
+            <vlan>
+                <vlan_id>{$VLAN}</vlan_id>
+                <old_vlan_id>{$OLD_VLAN}</old_vlan_id>
+                <pe_interface>{$PE_INTERFACE}</pe_interface>
+            </vlan>
+        </vlans>
+    </moveSubPE>
+</config>

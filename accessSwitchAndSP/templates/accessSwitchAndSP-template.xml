@@ -1,0 +1,128 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$POI_DEVICE}</name>
+      <config>
+        <!-- 
+        interface TenGigE0/0/2/0.800 l2transport
+          encapsulation dot1q 800 second-dot1q any
+         -->
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <TenGigE-subinterface>
+            <TenGigE>
+              <id>{$TO_SP_IF}.{$S_VLAN}</id>
+              <mode>l2transport</mode>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$S_VLAN}</vlan-id>
+                  <second-dot1q>any</second-dot1q>
+                </dot1q>
+              </encapsulation>
+            </TenGigE>
+          </TenGigE-subinterface>
+          <!-- 
+          interface PW-Ether800
+            mtu 1518
+            load-interval 30
+            attach generic-interface-list ISPA
+             -->
+          <PW-Ether>
+            <id>{$S_VLAN}</id>
+            <mtu>{$POI_PWETHER_MTU}</mtu>
+            <load-interval>{$LOAD_INTERVAL}</load-interval>
+            <attach>
+              <generic-interface-list>{$SP_ID}</generic-interface-list>
+            </attach>
+          </PW-Ether>
+        </interface>
+        <!-- 
+        l2vpn
+          xconnect group ISPA
+            p2p ISPA
+            interface PW-Ether800
+            neighbor ipv4 172.31.1.3 pw-id 800
+              pw-class PWHE-CLASS
+               -->
+        <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <xconnect>
+            <group>
+              <name>{$SP_ID}</name>
+              <p2p>
+                <name>{$SP_ID}{$S_VLAN}</name>
+                <interface>
+                  <name>PW-Ether{$S_VLAN}</name>
+                </interface>
+                <neighbor>
+                  <address>{$PE_PWHE_IPADDRESS}</address>
+                  <pw-id>{$S_VLAN}</pw-id>
+                  <ip-version>ipv4</ip-version>
+                  <pw-class>PWHE-CLASS</pw-class>
+                </neighbor>
+              </p2p>
+            </group>
+          </xconnect>
+          <!-- 
+          bridge group ISPA
+            bridge-domain 800
+            !
+            interface TenGigE0/0/2/0.800
+           -->
+          <bridge>
+            <group>
+              <group-name>{$SP_ID}</group-name>
+              <bridge-domain>
+                <bridge-domain-name>{$S_VLAN}</bridge-domain-name>
+                <interface>
+                  <name>TenGigE{$TO_SP_IF}.{$S_VLAN}</name>
+                </interface>
+              </bridge-domain>
+            </group>
+          </bridge>
+        </l2vpn>
+        <!-- 
+        generic-interface-list ISPA
+          interface TenGigE0/0/2/1
+         -->
+        <generic-interface-list xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <name>{$SP_ID}</name>
+          <interface>
+            <name>TenGigE{$TO_PE_IF}</name>
+          </interface>
+        </generic-interface-list>
+      </config>
+    </device>
+    <device>
+      <name>{$PE_DEVICE}</name>
+      <config>
+        <!-- 
+        l2vpn
+          bridge group ISPA
+            bridge-domain 800
+            mtu 1504
+            vfi 800
+              neighbor 172.31.1.2 pw-id 800
+              pw-class PWHE-CLASS
+               -->
+        <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <bridge>
+            <group>
+              <group-name>{$SP_ID}</group-name>
+              <bridge-domain>
+                <bridge-domain-name>{$S_VLAN}</bridge-domain-name>
+                <mtu>{$PE_MTU}</mtu>
+                <vfi>
+                  <name>{$S_VLAN}</name>
+                  <neighbor>
+                    <address>{$POI_PWHE_IPADDRESS}</address>
+                    <pw-id>{$S_VLAN}</pw-id>
+                    <pw-class>PWHE-CLASS</pw-class>
+                  </neighbor>
+                </vfi>
+              </bridge-domain>
+            </group>
+          </bridge>
+        </l2vpn>
+      </config>
+    </device>
+  </devices>
+</config-template>

@@ -14,7 +14,8 @@ class ServiceCallbacks(Service):
     # must always exist.
     @Service.create
     def cb_create(self, tctx, root, service, proplist):
-        found = False
+
+        """ found = False
         maxEnd=0
         for sp in root.open_net_access.inventory.sps.sp:
             if sp.vlan_pool.start != None and sp.vlan_pool.end != None:
@@ -26,7 +27,7 @@ class ServiceCallbacks(Service):
         else:
             end = maxEnd
         service.vlan_pool.start = end + 1
-        service.vlan_pool.end = end + 31
+        service.vlan_pool.end = end + 33 """
 
 
 # ---------------------------------------------

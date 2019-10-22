@@ -1,0 +1,69 @@
+module accessSwitchAndSP {
+
+  namespace "http://example.com/accessSwitchAndSP";
+  prefix accessSwitchAndSP;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+  import open-net-access {
+    prefix open-net;
+  }
+
+  description
+    "OpenNet. Configuration of Access Switch / SP combination in POI and PE routers";
+
+  revision 2019-10-20 {
+    description
+      "Initial revision.";
+  }
+
+  augment /open-net:open-net-access {
+    list accessSwitchAndSP {
+      description "This is an RFS skeleton service";
+
+      key name;
+      leaf name {
+        tailf:info "Unique service id for the setup in POI and PE router of a combination of an Access Switch and a certain SP";
+        tailf:cli-allow-range;
+        type string;
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint accessSwitchAndSP-servicepoint;
+
+      leaf sp_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:sps/open-net:sp/open-net:sp_id";
+        }
+      }
+
+      leaf poi_area_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:poi_areas/open-net:poi_area/open-net:poi_area_id";
+        }
+      }
+      leaf pe_area_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:pe_areas/open-net:pe_area/open-net:pe_area_id";
+        }
+      }
+      leaf access_area_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area/open-net:access_area_id";
+        }
+      }
+      leaf access_node_id {
+        type leafref {
+          path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node/open-net:access_node_id";
+        }
+      }
+    }
+  }
+}

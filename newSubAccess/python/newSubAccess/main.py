@@ -4,8 +4,7 @@ from ncs.application import Service
 
 
 # ------------------------
-# OpenNET. Provisioning of a new customer in an access switch.
-# Initial revision December 2018.
+# SERVICE CALLBACK EXAMPLE
 # ------------------------
 class ServiceCallbacks(Service):
 

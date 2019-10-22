@@ -46,7 +46,7 @@ module newSubPE {
     }
 
     leaf pe_interface {
-      tailf:info "Interface Number";
+      tailf:info "Interface designation. Example: 0/0/0/0.520";
       type string;
     }
 
@@ -56,20 +56,20 @@ module newSubPE {
     }
 
     leaf pw_id {
-      tailf:info "Pseudowire ID";
+      tailf:info "Pseudowire ID. Example 500";
       type uint32 {
         range "100..999";
       }
     }
 
-    list vlan {
-      key vlan_id;
-      description "List of the customer VLAN's";
-
-      leaf vlan_id {
-        tailf:info "Customer VLAN";
-        type uint32 {
-          range "100..999";
+    container vlans {
+      list vlan {
+        key "vlan_id";
+        leaf vlan_id {
+          tailf:info "Subscriber VLAN (100-999)";
+          type uint32 {
+            range "100..999";
+          }
         }
       }
     }

@@ -4,6 +4,37 @@
       <name>{$DEVICE}</name>
       <config>
         <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <!-- interface TenGigE0/0/2/3.500217 l2transport    $REMOTE_INT_ID = 0/0/2/3.500217
+            encapsulation dot1q 501 second-dot1q 201          $S_VLAN = 501     $C_VLAN_ID = 201
+            rewrite ingress tag pop 2 symmetric -->
+          <TenGigE-subinterface>
+            <TenGigE>
+              <id>{$REMOTE_INT_ID}</id>
+              <mode>l2transport</mode>
+              <description>Subscription {$SUBSCRIPTION_ID}, S,C: {$ORIGINAL_S_VLAN}, {$C_VLAN_ID}</description>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$ORIGINAL_S_VLAN}</vlan-id>
+                  <second-dot1q>{$OLD_C_VLAN_ID}</second-dot1q>
+                </dot1q>
+              </encapsulation>
+              <rewrite>
+                <ingress>
+                  <tag>
+                    <pop>2</pop>
+                    <mode>symmetric</mode>
+                  </tag>
+                </ingress>
+              </rewrite>
+            </TenGigE>
+          </TenGigE-subinterface>
+          <!-- interface PW-Ether501.1 l2transport
+            description TDC-kunde3-tranllated
+            encapsulation dot1q 201-208
+            rewrite ingress tag push dot1q 501 symmetric
+            service-policy input 220M_TDC_UNI_IN
+            service-policy output 220M_TDC_UNI_OUT
+            ! -->
           <PW-Ether-subinterface>
             <PW-Ether>
               <id>{$PWESUBINT}</id>
@@ -17,30 +48,73 @@
                   <name>{$QOS_OUT}</name>
                 </output>
               </service-policy>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$OLD_C_VLAN_ID}</vlan-id>
+                </dot1q>
+              </encapsulation>
               <rewrite>
                 <ingress>
                   <tag>
                     <push/>
-                    <dot1q>{$S_VLAN}</dot1q>
+                    <dot1q>{$ORIGINAL_S_VLAN}</dot1q>
                     <mode>symmetric</mode>
                   </tag>
                 </ingress>
               </rewrite>
             </PW-Ether>
           </PW-Ether-subinterface>
+          <!-- interface BVI217
+            ipv4 address 10.3.201.1 255.255.255.0
+            ! -->
+          <BVI>
+          <id>{$C_VLAN_ID}</id>
+          <description>Subscription {$SUBSCRIPTION_ID}, S,C: {$ORIGINAL_S_VLAN}, {$C_VLAN_ID}</description>
+            <ipv4>
+              <address>
+                <ip>{$BVI_IP_ADDR}</ip>
+                <mask>255.255.255.0</mask>
+              </address>
+            </ipv4>
+          </BVI>
         </interface>
         <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
           <bridge>
+            <!-- bridge group TDC
+              bridge-domain 501
+              interface PW-Ether501.1
+                split-horizon group
+              !
+              interface TenGigE0/0/2/0.501 -->
             <group>
               <group-name>{$SP_ID}</group-name>
               <bridge-domain>
-                <bridge-domain-name>{$S_VLAN}</bridge-domain-name>
+                <bridge-domain-name>{$ORIGINAL_S_VLAN}</bridge-domain-name>
                 <interface>
                   <name>PW-Ether{$PWESUBINT}</name>
                   <split-horizon>
                     <group/>
                   </split-horizon>
                 </interface>
+              </bridge-domain>
+            </group>
+            <!-- bridge group TEST
+              bridge-domain 217
+              interface TenGigE0/0/2/3.500217
+              !
+              routed interface BVI217 -->
+            <group>
+              <group-name>TEST</group-name>
+              <bridge-domain>
+                <bridge-domain-name>{$C_VLAN_ID}</bridge-domain-name>
+                <interface>
+                  <name>TenGigE{$REMOTE_INT_ID}</name>
+                </interface>
+                <routed>
+                  <interface>
+                    <name>BVI{$C_VLAN_ID}</name>
+                  </interface>
+                </routed>
               </bridge-domain>
             </group>
           </bridge>

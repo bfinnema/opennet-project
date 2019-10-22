@@ -11,6 +11,7 @@ from ncs.application import Service
 # Changed by Bo Finnemann, January 8th: Introduced the PW Sub-interface ID leaf to be able to select that separately by RM.
 # Changed by Bo Finnemann, January 31st: Adding the Remote POI capabilities in order to be able to do service assurance.
 # Changed by Bo Finnemann, February 17th: SP_ID needed for PE and POI.
+# Bo Finnemann. The ability to handle moved subscribers is introduced.
 # ------------------------
 class ServiceCallbacks(Service):
 
@@ -45,10 +46,11 @@ class ServiceCallbacks(Service):
         mvr_vlan = root.open_net_access.inventory.sps.sp[service.sp_id].mvr_vlan
         inner_vlans = root.open_net_access.inventory.sps.sp[sp_id].services.service[service.service_id].vlans
         # self.log.info('Inner VLANs: ', inner_vlans[0].vlan)
+        # mvr_receiver_vlan = service.vlan_mappings.vlan_mapping[0].outer_vlan
         for vlan_mapping in service.vlan_mappings.vlan_mapping:
             for vlan in inner_vlans:
-                self.log.info('Inner VLAN: ', vlan.vlan)
-                self.log.info('Multicast?: ', vlan.multicast)
+                # self.log.info('Inner VLAN: ', vlan.vlan)
+                # self.log.info('Multicast?: ', vlan.multicast)
                 if vlan_mapping.inner_vlan == vlan.vlan:
                     self.log.info('MATCH, Inner vlan: ', vlan.vlan, 'Outer vlan: ', vlan_mapping.outer_vlan)
                     if vlan.multicast:
@@ -75,7 +77,12 @@ class ServiceCallbacks(Service):
         s_vlan_offset = root.open_net_access.inventory.sps.sp[sp_id].s_vlan_offset
         s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.access_area_id].nodes.node[service.access_node_id].s_vlan_num
         s_vlan = s_vlan_offset + s_vlan_num
+        original_s_vlan = s_vlan
         pw_sub_interface = str(s_vlan) + "." + str(service.pwsubinterface_id)
+        if service.moved_subscriber:
+            original_s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.original_access.access_area_id].nodes.node[service.original_access.access_node_id].s_vlan_num
+            original_s_vlan = s_vlan_offset + original_s_vlan_num
+            pw_sub_interface = str(original_s_vlan) + "." + str(service.pwsubinterface_id)
         vars.add("DEVICE",poi_device)
         vars.add("CPE_ID",cpe_id)
         vars.add("PWESUBINT",pw_sub_interface)
@@ -83,30 +90,51 @@ class ServiceCallbacks(Service):
         vars.add("QOS_IN",qos_in)
         vars.add("QOS_OUT",qos_out)
         vars.add("S_VLAN",s_vlan)
+        vars.add("ORIGINAL_S_VLAN",original_s_vlan)
         for vlan_mapping in service.vlan_mappings.vlan_mapping:
             # remote_interface_id = remote_interface + "." + s_vlan + vlan_mapping.outer_vlan
             # vars.add('REMOTE_INT_ID', remote_interface_id)
             vars.add("C_VLAN",vlan_mapping.outer_vlan)
+            vars.add("OLD_C_VLAN",vlan_mapping.old_vlan)
             template.apply('open-net-core-poi', vars)
         
         # INSTANCIATE PE SERVICE 
         pe_device = root.open_net_access.inventory.pe_areas.pe_area[service.pe_area_id].node.pe_node_id
         pe_base_interface = root.open_net_access.inventory.pe_areas.pe_area[service.pe_area_id].node.pe_if
-        pwsubinterface = s_vlan_offset + service.pwsubinterface_id
-        pe_interface = pe_base_interface + "." + str(pwsubinterface)
         vars.add("DEVICE",pe_device)
-        vars.add("INTERFACE",pe_interface)
-        for vlan_mapping in service.vlan_mappings.vlan_mapping:
-            vars.add("VLAN",vlan_mapping.outer_vlan)
-            template.apply('open-net-core-pe', vars)
+        if service.moved_subscriber:
+            # self.log.info('The subscriber is moved, device: ', pe_device)
+            vars.add("ORIGINAL_S_VLAN",original_s_vlan)
+            for vlan_mapping in service.vlan_mappings.vlan_mapping:
+                # self.log.info('Outer VLAN: ', vlan_mapping.outer_vlan)
+                # self.log.info('Old Outer VLAN: ', vlan_mapping.old_vlan)
+                vars.add("VLAN",vlan_mapping.outer_vlan)
+                vars.add("OLD_VLAN",vlan_mapping.old_vlan)
+                pwsubinterface_moved = s_vlan_offset + vlan_mapping.pw_sub_if
+                pe_interface_moved = pe_base_interface + "." + str(pwsubinterface_moved)
+                # self.log.info('PE Interface, moved sub: ', pe_interface_moved)
+                vars.add("PE_INTERFACE",pe_interface_moved)
+                template.apply('open-net-core-pe-moved', vars)
+        else:
+            pwsubinterface = s_vlan_offset + service.pwsubinterface_id
+            pe_interface = pe_base_interface + "." + str(pwsubinterface)
+            # self.log.info('The subscriber is NOT! moved, pe_interface: ', pe_interface)
+            vars.add("PE_INTERFACE",pe_interface)
+            for vlan_mapping in service.vlan_mappings.vlan_mapping:
+                self.log.info('Outer VLAN: ', vlan_mapping.outer_vlan)
+                vars.add("VLAN",vlan_mapping.outer_vlan)
+                template.apply('open-net-core-pe', vars)
 
         # INSTANCIATE CPE SERVICE 
-        vars.add("DEVICE",'cpe-asr920')
-        for vlan_mapping in service.vlan_mappings.vlan_mapping:
-            vars.add("INNER_VLAN",vlan_mapping.inner_vlan)
-            vars.add("OUTER_VLAN",vlan_mapping.outer_vlan)
-            template.apply('open-net-core-cpe', vars)
-
+        if cpe_id < 5:
+            self.log.info('Deploying CPE part for cpe_id: ', cpe_id)
+            vars.add("DEVICE",'cpe-asr920')
+            for vlan_mapping in service.vlan_mappings.vlan_mapping:
+                vars.add("INNER_VLAN",vlan_mapping.inner_vlan)
+                vars.add("OUTER_VLAN",vlan_mapping.outer_vlan)
+                template.apply('open-net-core-cpe', vars)
+        else:
+            self.log.info('Does NOT deploy CPE part for cpe_id: ', cpe_id)
 
     # The pre_modification() and post_modification() callbacks are optional,
     # and are invoked outside FASTMAP. pre_modification() is invoked before

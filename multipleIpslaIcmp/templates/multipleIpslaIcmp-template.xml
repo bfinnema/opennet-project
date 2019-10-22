@@ -1,0 +1,30 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <ipsla xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <operation>
+            <id>{$OPERATION_ID}</id>
+            <type>
+              <icmp>
+                <name>echo</name>
+                <destination>
+                  <address>{$DESTINATION_IP}</address>
+                </destination>
+              </icmp>
+            </type>
+          </operation>
+          <schedule>
+            <operation>
+              <id>{$OPERATION_ID}</id>
+              <start-time>
+                <now/>
+              </start-time>
+            </operation>
+          </schedule>
+        </ipsla>
+      </config>
+    </device>
+  </devices>
+</config-template>

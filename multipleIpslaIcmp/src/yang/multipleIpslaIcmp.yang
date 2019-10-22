@@ -1,0 +1,60 @@
+module multipleIpslaIcmp {
+
+  namespace "http://example.com/multipleIpslaIcmp";
+  prefix multipleIpslaIcmp;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "The service executes multiple ipsla icmp operations on the target device";
+
+  revision 2019-03-07 {
+    description
+      "Initial revision.";
+  }
+
+  list multipleIpslaIcmp {
+    description "This is an RFS skeleton service";
+
+    key subscription_id;
+    leaf subscription_id {
+      tailf:info "Unique subscription id";
+      tailf:cli-allow-range;
+      type string;
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint multipleIpslaIcmp-servicepoint;
+
+    leaf device {
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    leaf cpe_id {
+      tailf:info "A virtual CPE used for the demo";
+      type uint32;
+    }
+
+    list vlan {
+      key vlan_id;
+      description "List of the customer VLAN's";
+
+      leaf vlan_id {
+        tailf:info "Customer VLAN";
+        type uint32 {
+          range "100..999";
+        }
+      }
+    }
+  }
+}

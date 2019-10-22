@@ -1,0 +1,77 @@
+module moveSubPE {
+
+  namespace "http://example.com/moveSubPE";
+  prefix moveSubPE;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "OpenNET. Provisioning of a moved customer in a PE";
+
+  revision 2019-04-07 {
+    description
+      "Initial revision.";
+  }
+
+  list moveSubPE {
+    description "This is an RFS skeleton service";
+
+    key subscription_id;
+    leaf subscription_id {
+      tailf:info "Subscription ID = SP ID + Subscriber ID + Service ID";
+      type string;
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint moveSubPE-servicepoint;
+
+    leaf device {
+      tailf:info "PE Router to serve this Subscriber";
+      type leafref {
+        path "/ncs:devices/ncs:device/ncs:name";
+      }
+    }
+
+    leaf sp_id {
+      tailf:info "Service Provider";
+      type string;
+    }
+
+    leaf pw_id {
+      tailf:info "Pseudowire ID. Example 500";
+      type uint32 {
+        range "100..999";
+      }
+    }
+
+    container vlans {
+      list vlan {
+        key "vlan_id";
+        leaf vlan_id {
+          tailf:info "Subscriber VLAN (100-999)";
+          type uint32 {
+            range "100..999";
+          }
+        }
+        leaf old_vlan_id {
+          tailf:info "Original outer Subscriber VLAN (100-999)";
+          type uint32 {
+            range "100..999";
+          }
+        }
+        leaf pe_interface {
+          tailf:info "Interface designation. Example: 0/0/0/0.520";
+          type string;
+        }
+      }
+    }
+  }
+}

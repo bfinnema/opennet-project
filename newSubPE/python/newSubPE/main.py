@@ -23,7 +23,7 @@ class ServiceCallbacks(Service):
         # vars.add('SP_ID', service.sp_id)
         vars.add('SP_ID', service.sp_id)
         vars.add('PW_ID', service.pw_id)
-        for vlan in service.vlan:
+        for vlan in service.vlans.vlan:
             vars.add('VLAN_ID', vlan.vlan_id)
             template = ncs.template.Template(service)
             template.apply('newSubPE-template', vars)

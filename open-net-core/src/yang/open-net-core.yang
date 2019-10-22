@@ -16,6 +16,11 @@ module open-net-core {
     prefix open-net;
   }
 
+  revision 2019-04-07 {
+    description
+      "Bo Finnemann. The ability to handle moved subscribers is introduced.";
+  }
+
   revision 2019-01-08 {
     description
       "Bo Finnemann. Introduced the PW Sub-interface ID leaf to be able to select that separately by RM";
@@ -51,20 +56,61 @@ module open-net-core {
       leaf subscriber_id {
         tailf:info "Subscriber ID";
         type string;
+        mandatory true;
       }
 
       leaf pwsubinterface_id {
-        tailf:info "PW Sub-interface ID";
+        tailf:info "PW Sub-interface ID, example: 20";
         type uint32;
+        mandatory true;
       }
 
-      container vlan_mappings{
+      /* leaf original_s_vlan {
+        tailf:info "The original PW number (S-VLAN) for a moved subscriber, example: 501";
+        type uint32;
+        mandatory true;
+      } */
+
+      leaf moved_subscriber {
+        tailf:info "Is this subscriber being moved from one access switch to another?";
+        type boolean;
+        mandatory true;
+      }
+
+      container original_access {
+        leaf access_area_id {
+          tailf:info "The source access area of a moved subscriber";
+          type leafref {
+            path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area/open-net:access_area_id";
+          }
+        }
+        leaf access_node_id {
+          tailf:info "The source access node of a moved subscriber";
+          type leafref {
+            path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node/open-net:access_node_id";
+          }
+        }
+        leaf access_if {
+          tailf:info "The source access interface of a moved subscriber";
+          type leafref {
+            path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node[open-net:access_node_id=current()/../access_node_id]/open-net:interfaces/open-net:interface/open-net:access_if";
+          }
+        }
+      }
+
+      container vlan_mappings {
         list vlan_mapping {
           key "inner_vlan outer_vlan";
           leaf inner_vlan {
             type uint32;
           }
           leaf outer_vlan {
+            type uint32;
+          }
+          leaf old_vlan {
+            type uint32;
+          }
+          leaf pw_sub_if {
             type uint32;
           }
         }
@@ -90,13 +136,6 @@ module open-net-core {
           path "/open-net:open-net-access/open-net:inventory/open-net:sps/open-net:sp[open-net:sp_id=current()/../sp_id]/open-net:services/open-net:service/open-net:id";
         }
       }
-/* 
-      leaf service_id {
-        type leafref {
-          path "/open-net:open-net-access/open-net:inventory/open-net:services/open-net:service/open-net:id";
-        }
-      }
- */      
       leaf access_area_id {
         type leafref {
           path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area/open-net:access_area_id";

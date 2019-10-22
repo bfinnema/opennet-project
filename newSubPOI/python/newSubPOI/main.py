@@ -19,21 +19,21 @@ class ServiceCallbacks(Service):
 
         vars = ncs.template.Variables()
         vars.add("DEVICE",service.device)
-        # vars.add('SP_ID', service.sp_id)
-        if service.sp_id == "ISPT":
-            vars.add('SP_ID', 'TDC')
-        else:
-            vars.add('SP_ID', service.sp_id)
-        # vars.add('SP_ID', 'TDC')
+        # if service.sp_id == "ISPT":
+        #     vars.add('SP_ID', 'TDC')
+        # else:
+        #     vars.add('SP_ID', service.sp_id)
+        vars.add('SP_ID', service.sp_id)
         vars.add('PWESUBINT', service.PWESubInt)
         vars.add('REMOTEINT', service.remote_interface)
         vars.add('SUBSCRIPTION_ID', service.subscription_id)
         vars.add('QOS_IN', service.QoS_In)
         vars.add('QOS_OUT', service.QoS_Out)
         vars.add('S_VLAN', service.s_vlan)
+        vars.add('ORIGINAL_S_VLAN', service.original_s_vlan)
         template = ncs.template.Template(service)
-        template.apply('newSubPOI-template', vars)
-        for c_vlan in service.c_vlan:
+        # template.apply('newSubPOI-template', vars)
+        for c_vlan in service.c_vlans.c_vlan:
             remote_interface_id = str(service.remote_interface) + "." + str(service.s_vlan) + str(c_vlan.c_vlan_id)
             self.log.info('remote_interface_id =', remote_interface_id)
             bvi_ip_addr = "10." + str(service.cpe_id) + "." + str(c_vlan.c_vlan_id%255) + ".1"
@@ -41,7 +41,8 @@ class ServiceCallbacks(Service):
             vars.add('REMOTE_INT_ID', remote_interface_id)
             vars.add('BVI_IP_ADDR', bvi_ip_addr)
             vars.add('C_VLAN_ID', c_vlan.c_vlan_id)
-            template.apply('newSubPOI-vlan-template', vars)
+            vars.add('OLD_C_VLAN_ID', c_vlan.old_c_vlan_id)
+            template.apply('newSubPOI-template', vars)
 
     # The pre_modification() and post_modification() callbacks are optional,
     # and are invoked outside FASTMAP. pre_modification() is invoked before

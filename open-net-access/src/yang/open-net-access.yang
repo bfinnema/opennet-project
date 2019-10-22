@@ -16,6 +16,11 @@ module open-net-access {
   description
     "OpenNET Inventory";
 
+  revision 2019-10-19 {
+    description
+      "Bo Finnemann. Changes initiated by introduction of the 'newAccessSwitch' service. Removed vlan_range under sps - it was not used. Removed out-commmented mvr_receiver_vlan. Added PWHE IP address to POI and PE areas. Added interfaces to SP and to PE to POI area.";
+  }
+
   revision 2019-01-31 {
     description
       "Bo Finnemann. Added CPE's";
@@ -68,15 +73,6 @@ module open-net-access {
             tailf:info "Multicast VLAN Registration (MVR)";
             type uint32;
           }
-/* 
-          leaf mvr_receiver_vlan {
-            tailf:info "Multicast VLAN Registration (MVR), Receiver VLAN";
-            type uint32;
-          }
- */          
-          leaf-list vlan_range {
-            type uint32;
-          }
           container services {
             list service {
               key id;
@@ -109,7 +105,8 @@ module open-net-access {
               }
             }
           }
-          container vlan_pool {
+
+          /* container vlan_pool {
             leaf start {
               tailf:info "Vlan pool start";
               type uint32;
@@ -118,7 +115,8 @@ module open-net-access {
               tailf:info "Vlan pool end";
               type uint32;
             }
-          }
+          } */
+
         }
       }
       container poi_areas{
@@ -133,16 +131,27 @@ module open-net-access {
             type string;
           }
           container node {
-              leaf poi_node_id {
-                type leafref {
-                  path "/ncs:devices/ncs:device/ncs:name";
-                }
+            leaf poi_node_id {
+              type leafref {
+                path "/ncs:devices/ncs:device/ncs:name";
               }
-              leaf poi_if {
-                tailf:info "SP Remote POI interface";
-                type string;
-              }
-            
+            }
+            leaf to_pe_if {
+              tailf:info "Physical interface to PE";
+              type string;
+            }
+            leaf to_sp_if {
+              tailf:info "Physical interface to SP. PW termination.";
+              type string;
+            }
+            leaf poi_if {
+              tailf:info "SP Remote POI interface";
+              type string;
+            }
+            leaf poi_pwhe_ipaddress {
+              tailf:info "IP address of the Loopback used for PWHE";
+              type inet:ipv4-address;
+            }
           }
         }
       }
@@ -158,15 +167,19 @@ module open-net-access {
             type string;
           }
           container node {
-              leaf pe_node_id {
-                type leafref {
-                  path "/ncs:devices/ncs:device/ncs:name";
-                }
+            leaf pe_node_id {
+              type leafref {
+                path "/ncs:devices/ncs:device/ncs:name";
               }
-              leaf pe_if {
-                tailf:info "PE interface for subinterfaces";
-                type string;
-              }
+            }
+            leaf pe_if {
+              tailf:info "PE interface for subinterfaces";
+              type string;
+            }
+            leaf pe_pwhe_ipaddress {
+              tailf:info "IP address of the Loopback used for PWHE";
+              type inet:ipv4-address;
+            }
           }
         }
       }
@@ -236,7 +249,7 @@ module open-net-access {
           leaf cpe_id {
             tailf:info "Number 1, 2, 3 or 4";
             type uint32 {
-                range "1..4";
+                range "1..20";
             }
           }
           leaf bdi_ip_address {

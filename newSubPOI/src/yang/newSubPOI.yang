@@ -16,6 +16,11 @@ module newSubPOI {
   description
     "OpenNET. Provisioning of a new customer in a PoI area";
 
+  revision 2019-04-08 {
+    description
+      "Adding capability to handle moved subscribers.";
+  }
+
   revision 2019-02-17 {
     description
       "Adding sp_id in order to do Service Provider bridge group.";
@@ -48,49 +53,70 @@ module newSubPOI {
       type leafref {
         path "/ncs:devices/ncs:device/ncs:name";
       }
+      mandatory true;
     }
 
     leaf cpe_id {
-      tailf:info "A virtual CPE used for the demo";
+      tailf:info "A virtual CPE used for the demo. Example: 1";
       type uint32 {
-        range "1..4";
+        range "1..20";
       }
+      mandatory true;
     }
     leaf PWESubInt {
-      tailf:info "Subinterface ID";
+      tailf:info "Subinterface ID. Example: 500.20";
       type string;
+      mandatory true;
     }
     leaf remote_interface {
-      tailf:info "SP Remote POI interface";
+      tailf:info "SP Remote POI interface. Example: 0/0/2/3";
       type string;
+      mandatory true;
     }
     leaf sp_id {
-      tailf:info "Service Provider";
+      tailf:info "Service Provider. Example: ISPT";
       type string;
+      mandatory true;
     }
     leaf QoS_Out {
-      tailf:info "Upstream QoS profile";
+      tailf:info "Upstream QoS profile. Example: 220M_TDC_UNI_OUT";
       type string;
+      default "220M_TDC_UNI_OUT";
     }
     leaf QoS_In {
-      tailf:info "Downstream QoS profile";
+      tailf:info "Downstream QoS profile. Example: 220M_TDC_UNI_IN";
       type string;
+      default "220M_TDC_UNI_IN";
     }
     leaf s_vlan {
-      tailf:info "Provider VLAN (100-3300)";
+      tailf:info "Provider VLAN (100-999). Example: 500";
+      type uint32 {
+        range "100..999";
+      }
+      mandatory true;
+    }
+
+    leaf original_s_vlan {
+      tailf:info "Provider VLAN (100-999) for a moved subscriber. Example: 501";
       type uint32 {
         range "100..999";
       }
     }
 
-    list c_vlan {
-      key c_vlan_id;
-      description "List of C-VLAN's";
-
-      leaf c_vlan_id {
-        tailf:info "Subscriber VLAN (100-3300)";
-        type uint32 {
-          range "100..999";
+    container c_vlans {
+      list c_vlan {
+        key "c_vlan_id";
+        leaf c_vlan_id {
+          tailf:info "Subscriber VLAN (100-999)";
+          type uint32 {
+            range "100..999";
+          }
+        }
+        leaf old_c_vlan_id {
+          tailf:info "Original outer Subscriber VLAN (100-999)";
+          type uint32 {
+            range "100..999";
+          }
         }
       }
     }

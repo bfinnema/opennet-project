@@ -43,7 +43,7 @@ module newSubCPE {
     leaf cpe_id {
       tailf:info "A virtual CPE used for the demo";
       type uint32 {
-        range "1..4";
+        range "1..20";
       }
     }
     list vlans {
