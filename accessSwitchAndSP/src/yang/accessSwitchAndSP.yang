@@ -38,6 +38,10 @@ module accessSwitchAndSP {
       uses ncs:service-data;
       ncs:servicepoint accessSwitchAndSP-servicepoint;
 
+      leaf vlanpool_id {
+        type string;
+      }
+
       leaf sp_id {
         type leafref {
           path "/open-net:open-net-access/open-net:inventory/open-net:sps/open-net:sp/open-net:sp_id";

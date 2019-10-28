@@ -65,12 +65,6 @@ module open-net-core {
         mandatory true;
       }
 
-      /* leaf original_s_vlan {
-        tailf:info "The original PW number (S-VLAN) for a moved subscriber, example: 501";
-        type uint32;
-        mandatory true;
-      } */
-
       leaf moved_subscriber {
         tailf:info "Is this subscriber being moved from one access switch to another?";
         type boolean;
@@ -79,23 +73,23 @@ module open-net-core {
 
       container original_access {
         leaf access_area_id {
-          tailf:info "The source access area of a moved subscriber";
+          tailf:info "The source access area of a moved subscriber. Only needed in case of moving a subscription";
           type leafref {
             path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area/open-net:access_area_id";
           }
         }
         leaf access_node_id {
-          tailf:info "The source access node of a moved subscriber";
+          tailf:info "The source access node of a moved subscriber. Only needed in case of moving a subscription";
           type leafref {
             path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node/open-net:access_node_id";
           }
         }
-        leaf access_if {
-          tailf:info "The source access interface of a moved subscriber";
+        /* leaf access_if {
+          tailf:info "The source access interface of a moved subscriber. Only needed in case of moving a subscription";
           type leafref {
             path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node[open-net:access_node_id=current()/../access_node_id]/open-net:interfaces/open-net:interface/open-net:access_if";
           }
-        }
+        } */
       }
 
       container vlan_mappings {
@@ -108,9 +102,11 @@ module open-net-core {
             type uint32;
           }
           leaf old_vlan {
+            tailf:info "The old vlan is needed only when moving a subscription";
             type uint32;
           }
           leaf pw_sub_if {
+            tailf:info "The PW sub-interface for each VLAN is needed only when moving a subscription";
             type uint32;
           }
         }

@@ -1,0 +1,21 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <open-net-access xmlns="http://example.com/open-net-access">
+        <inventory>
+            <sps>
+                <sp>
+                    <sp_id>{$SP_ID}</sp_id>
+                    <access_deployment>
+                        <access_area>
+                            <access_area_id>{$ACCESS_AREA_ID}</access_area_id>
+                            <access_nodes>
+                                <access_node_id>{$ACCESS_NODE_ID}</access_node_id>
+                                <access_node_and_sp_service_id>{$ACCESS_NODE_AND_SP_SERVICE_ID}</access_node_and_sp_service_id>
+                                <vlanpool_id>{$VLANPOOL_ID}</vlanpool_id>
+                            </access_nodes>
+                        </access_area>
+                    </access_deployment>
+                </sp>
+            </sps>
+        </inventory>
+    </open-net-access>
+</config>

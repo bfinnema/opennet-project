@@ -15,6 +15,8 @@ class ServiceCallbacks(Service):
         self.log.info('Service create(service=', service._path, ')')
 
         vars = ncs.template.Variables()
+        template = ncs.template.Template(service)
+
         poi_device = root.open_net_access.inventory.poi_areas.poi_area[service.poi_area_id].node.poi_node_id
         vars.add('POI_DEVICE', poi_device)
         to_sp_if = root.open_net_access.inventory.poi_areas.poi_area[service.poi_area_id].node.to_sp_if
@@ -46,8 +48,14 @@ class ServiceCallbacks(Service):
         vars.add('PE_MTU', 1504)
         vars.add('LOAD_INTERVAL', 30)
 
-        template = ncs.template.Template(service)
         template.apply('accessSwitchAndSP-template', vars)
+
+        vars.add('ACCESS_AREA_ID', service.access_area_id)
+        vars.add('ACCESS_NODE_ID', service.access_node_id)
+        vars.add('ACCESS_NODE_AND_SP_SERVICE_ID', service.name)
+        vars.add('VLANPOOL_ID', service.vlanpool_id)
+        template.apply('accessSwitchAndSP-SP-template', vars)
+
 
     # The pre_modification() and post_modification() callbacks are optional,
     # and are invoked outside FASTMAP. pre_modification() is invoked before

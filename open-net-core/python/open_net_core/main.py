@@ -95,7 +95,14 @@ class ServiceCallbacks(Service):
             # remote_interface_id = remote_interface + "." + s_vlan + vlan_mapping.outer_vlan
             # vars.add('REMOTE_INT_ID', remote_interface_id)
             vars.add("C_VLAN",vlan_mapping.outer_vlan)
-            vars.add("OLD_C_VLAN",vlan_mapping.old_vlan)
+            self.log.info('OLD C_VLAN: ', vlan_mapping.old_vlan)
+            if not vlan_mapping.old_vlan:
+                old_vlan = vlan_mapping.outer_vlan
+            else:
+                old_vlan = vlan_mapping.old_vlan
+            vars.add("OLD_C_VLAN",old_vlan)
+            self.log.info('OLD C_VLAN now: ', old_vlan)
+            # vars.add("OLD_C_VLAN",vlan_mapping.old_vlan)
             template.apply('open-net-core-poi', vars)
         
         # INSTANCIATE PE SERVICE 

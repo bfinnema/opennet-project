@@ -16,9 +16,14 @@ module open-net-access {
   description
     "OpenNET Inventory";
 
+  revision 2019-10-25 {
+    description
+      "Bo Finnemann. Changes initiated by introduction of the 'accessSwitchAndSP' service. Introduced container access_deployment to sps.";
+  }
+
   revision 2019-10-19 {
     description
-      "Bo Finnemann. Changes initiated by introduction of the 'newAccessSwitch' service. Removed vlan_range under sps - it was not used. Removed out-commmented mvr_receiver_vlan. Added PWHE IP address to POI and PE areas. Added interfaces to SP and to PE to POI area.";
+      "Bo Finnemann. Changes initiated by introduction of the 'accessSwitchAndSP' service. Removed vlan_range under sps - it was not used. Removed out-commmented mvr_receiver_vlan. Added PWHE IP address to POI and PE areas. Added interfaces to SP and to PE to POI area.";
   }
 
   revision 2019-01-31 {
@@ -77,7 +82,7 @@ module open-net-access {
             list service {
               key id;
               leaf id {
-                tailf:info "Unique service id";
+                tailf:info "Unique service id within the SP";
                 type string;
               }
               list vlans {
@@ -105,18 +110,29 @@ module open-net-access {
               }
             }
           }
-
-          /* container vlan_pool {
-            leaf start {
-              tailf:info "Vlan pool start";
-              type uint32;
+          container access_deployment {
+            list access_area {
+              description "Used to log on which access nodes in which access areas the SP is deployed.";
+              key access_area_id;
+              leaf access_area_id {
+                tailf:info "access_area_id that must exist in the Access Area Inventory.";
+                type string;
+              }
+              list access_nodes {
+                key access_node_id;
+                leaf access_node_id {
+                  tailf:info "access_node_id that must exist in the Access Area Inventory for the access area above.";
+                  type string;
+                }
+                leaf access_node_and_sp_service_id {
+                  type string;
+                }
+                leaf vlanpool_id {
+                  type string;
+                }
+              }
             }
-            leaf end {
-              tailf:info "Vlan pool end";
-              type uint32;
-            }
-          } */
-
+          }
         }
       }
       container poi_areas{
