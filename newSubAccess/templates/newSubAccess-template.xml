@@ -13,10 +13,8 @@
               </mode>
               <vlan>
                 <mapping>
-                  <vlans>
-                    <OriginalVLANIDSOnWire>{$INNER_VLAN}</OriginalVLANIDSOnWire>
-                    <VLANIDTranslated>{$OUTER_VLAN}</VLANIDTranslated>
-                  </vlans>
+                  <id>{$INNER_VLAN}</id>
+                  <translated-id>{$OUTER_VLAN}</translated-id>
                 </mapping>
               </vlan>
             </switchport>
