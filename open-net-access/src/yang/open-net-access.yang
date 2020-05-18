@@ -16,6 +16,11 @@ module open-net-access {
   description
     "OpenNET Inventory";
 
+  revision 2020-04-19 {
+    description
+      "Bo Finnemann. The SP part is separated. This implies that sp_device is needed under sp. Support for EVPN-VPWS as tunnel technology in addition to PW";
+  }
+
   revision 2019-10-25 {
     description
       "Bo Finnemann. Changes initiated by introduction of the 'accessSwitchAndSP' service. Introduced container access_deployment to sps.";
@@ -70,6 +75,15 @@ module open-net-access {
             tailf:info "Unique SP id";
             type string;
           }
+          container node {
+            leaf sp_node_id {
+              type string;
+            }
+            leaf sp_if {
+              tailf:info "SP interface to be used on the sp_device";
+              type string;
+            }
+          }
           leaf s_vlan_offset {
             tailf:info "The S VLAN offset of the SP";
             type uint32;
@@ -77,6 +91,14 @@ module open-net-access {
           leaf mvr_vlan {
             tailf:info "Multicast VLAN Registration (MVR)";
             type uint32;
+          }
+          leaf sp_termination_type {
+            tailf:info "BNG or not?";
+            type enumeration {
+              enum BNG;
+              enum Other;
+            }
+            default Other;
           }
           container services {
             list service {
@@ -127,7 +149,10 @@ module open-net-access {
                 leaf access_node_and_sp_service_id {
                   type string;
                 }
-                leaf vlanpool_id {
+                leaf vlanpool_id_pw {
+                  type string;
+                }
+                leaf vlanpool_id_ev {
                   type string;
                 }
               }

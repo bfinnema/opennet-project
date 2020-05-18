@@ -1,0 +1,76 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <!-- interface TenGigE0/0/2/0.540 l2transport
+                description Subscription ISPT-Sub2.2-SERVICE-T4
+                encapsulation dot1q 500 second-dot1q 245-248
+                rewrite ingress tag pop 1 symmetric
+                service-policy input 220M_TDC_UNI_IN
+                service-policy output 220M_TDC_UNI_OUT
+            ! -->
+          <TenGigE-subinterface>
+            <TenGigE>
+              <id>{$POI_INTERFACE}.{$EVI}</id>
+              <mode>l2transport</mode>
+              <description>Subscription {$SUBSCRIPTION_ID}</description>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$ORIGINAL_S_VLAN}</vlan-id>
+                  <second-dot1q>{$OLD_C_VLAN_ID}</second-dot1q>
+                </dot1q>
+              </encapsulation>
+              <service-policy>
+                <input>
+                  <name>{$QOS_IN}</name>
+                </input>
+                <output>
+                  <name>{$QOS_OUT}</name>
+                </output>
+              </service-policy>
+              <rewrite>
+                <ingress>
+                  <tag>
+                    <pop>1</pop>
+                    <mode>symmetric</mode>
+                  </tag>
+                </ingress>
+              </rewrite>
+            </TenGigE>
+          </TenGigE-subinterface>
+        </interface>
+        <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <!-- xconnect group evpn_vpws
+                p2p ISPT
+                  interface TenGigE0/0/2/0.500
+                  neighbor evpn evi 540 target 40 source 40
+                  !
+                !
+              ! -->
+          <xconnect>
+            <group>
+              <name>{$SP_ID}-EVPN-VPWS</name>
+              <p2p>
+                <name>{$SP_ID}</name>
+                <interface>
+                  <name>TenGigE{$POI_INTERFACE}.{$EVI}</name>
+                </interface>
+                <neighbor-evpn>
+                  <neighbor>
+                    <evpn>
+                      <evi>{$EVI}</evi>
+                      <target>{$TARGET}</target>
+                      <source>{$SOURCE}</source>
+                    </evpn>
+                  </neighbor>
+                </neighbor-evpn>
+              </p2p>
+            </group>
+          </xconnect>
+        </l2vpn>
+      </config>
+    </device>
+  </devices>
+</config-template>

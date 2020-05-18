@@ -1,0 +1,71 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <!-- interface TenGigE0/0/2/3.500217 l2transport    $REMOTE_INT_ID = 0/0/2/3.500217
+            encapsulation dot1q 501 second-dot1q 201          $S_VLAN = 501     $C_VLAN_ID = 201
+            rewrite ingress tag pop 2 symmetric -->
+          <TenGigE-subinterface>
+            <TenGigE>
+              <id>{$REMOTE_INT_ID}</id>
+              <mode>l2transport</mode>
+              <description>Subscription {$SUBSCRIPTION_ID}, S,C: {$ORIGINAL_S_VLAN}, {$OLD_C_VLAN_ID}</description>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$ORIGINAL_S_VLAN}</vlan-id>
+                  <second-dot1q>{$OLD_C_VLAN_ID}</second-dot1q>
+                </dot1q>
+              </encapsulation>
+              <rewrite>
+                <ingress>
+                  <tag>
+                    <pop>2</pop>
+                    <mode>symmetric</mode>
+                  </tag>
+                </ingress>
+              </rewrite>
+            </TenGigE>
+          </TenGigE-subinterface>
+          <!-- interface BVI217
+            ipv4 address 10.3.201.1 255.255.255.0
+            ! -->
+          <BVI>
+            <id>{$C_VLAN_ID}</id>
+            <description>Subscription {$SUBSCRIPTION_ID}, S,C: {$ORIGINAL_S_VLAN}, {$C_VLAN_ID}</description>
+            <ipv4>
+              <address>
+                <ip>{$BVI_IP_ADDR}</ip>
+                <mask>255.255.255.0</mask>
+              </address>
+            </ipv4>
+          </BVI>
+        </interface>
+        <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <bridge>
+            <!-- bridge group TEST
+              bridge-domain 217
+              interface TenGigE0/0/2/3.500217
+              !
+              routed interface BVI217 -->
+            <group>
+              <group-name>TEST</group-name>
+              <bridge-domain>
+                <bridge-domain-name>{$C_VLAN_ID}</bridge-domain-name>
+                <interface>
+                  <name>TenGigE{$REMOTE_INT_ID}</name>
+                </interface>
+                <routed>
+                  <interface>
+                    <name>BVI{$C_VLAN_ID}</name>
+                  </interface>
+                </routed>
+              </bridge-domain>
+            </group>
+          </bridge>
+        </l2vpn>
+      </config>
+    </device>
+  </devices>
+</config-template>

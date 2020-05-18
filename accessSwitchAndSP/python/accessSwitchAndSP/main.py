@@ -17,6 +17,17 @@ class ServiceCallbacks(Service):
         vars = ncs.template.Variables()
         template = ncs.template.Template(service)
 
+        sp_id = service.sp_id
+        vars.add('SP_ID', sp_id)
+        s_vlan_offset = root.open_net_access.inventory.sps.sp[sp_id].s_vlan_offset
+        self.log.info('s_vlan_offset: ', s_vlan_offset)
+        s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.access_area_id].nodes.node[service.access_node_id].s_vlan_num
+        s_vlan = s_vlan_offset + s_vlan_num
+        vars.add('S_VLAN', s_vlan)
+        self.log.info('s_vlan: ', s_vlan)
+        subif_ev = s_vlan + 80
+        vars.add('SUBIF_EV', subif_ev)
+
         poi_device = root.open_net_access.inventory.poi_areas.poi_area[service.poi_area_id].node.poi_node_id
         vars.add('POI_DEVICE', poi_device)
         to_sp_if = root.open_net_access.inventory.poi_areas.poi_area[service.poi_area_id].node.to_sp_if
@@ -34,28 +45,46 @@ class ServiceCallbacks(Service):
         pe_pwhe_ipaddress = root.open_net_access.inventory.pe_areas.pe_area[service.pe_area_id].node.pe_pwhe_ipaddress
         self.log.info('pe_pwhe_ipaddress: ', pe_pwhe_ipaddress)
         vars.add('PE_PWHE_IPADDRESS', pe_pwhe_ipaddress)
-
-        sp_id = service.sp_id
-        vars.add('SP_ID', sp_id)
-        s_vlan_offset = root.open_net_access.inventory.sps.sp[sp_id].s_vlan_offset
-        self.log.info('s_vlan_offset: ', s_vlan_offset)
-        s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.access_area_id].nodes.node[service.access_node_id].s_vlan_num
-        s_vlan = s_vlan_offset + s_vlan_num
-        vars.add('S_VLAN', s_vlan)
-        self.log.info('s_vlan: ', s_vlan)
+        pe_base_interface = root.open_net_access.inventory.pe_areas.pe_area[service.pe_area_id].node.pe_if
+        # pe_interface = pe_base_interface + "." + str(s_vlan)    # PE interface used for EVPN-VPWS. Used for encapsulating the entire VLAN pool for EVPN-VPWS.
+        vars.add('PE_INTERFACE', pe_base_interface)
+        vars.add('EVI', subif_ev)   # Example: 520
+        vars.add('PE_TARGET', s_vlan)
+        vars.add('PE_SOURCE', s_vlan)
+        vars.add('POI_TARGET', s_vlan)
+        vars.add('POI_SOURCE', s_vlan)
 
         vars.add('POI_PWETHER_MTU', 1518)
         vars.add('PE_MTU', 1504)
         vars.add('LOAD_INTERVAL', 30)
 
-        template.apply('accessSwitchAndSP-template', vars)
+        vlanpool_id_pw = service.vlanpools.vlanpool_pw.vlanpool_id_pw
+        self.log.info('vlanpool_id_pw: ', vlanpool_id_pw)
+        vlanpool_id_ev = service.vlanpools.vlanpool_ev.vlanpool_id_ev
+        self.log.info('vlanpool_id_ev: ', vlanpool_id_ev)
+        vlan_ev_start_id = service.vlanpools.vlanpool_ev.vlan_ev_start_id
+        self.log.info('vlan_ev_start_id: ', vlan_ev_start_id)
+        vlan_ev_end_id = service.vlanpools.vlanpool_ev.vlan_ev_end_id
+        self.log.info('vlan_ev_end_id: ', vlan_ev_end_id)
 
         vars.add('ACCESS_AREA_ID', service.access_area_id)
         vars.add('ACCESS_NODE_ID', service.access_node_id)
         vars.add('ACCESS_NODE_AND_SP_SERVICE_ID', service.name)
-        vars.add('VLANPOOL_ID', service.vlanpool_id)
+        vars.add('VLANPOOL_ID_PW', vlanpool_id_pw)
+        vars.add('VLANPOOL_ID_EV', vlanpool_id_ev)
+        # vars.add('VLANPOOL_ID_PW', "SP1_VP1_PW")
+        # vars.add('VLANPOOL_ID_EV', "SP1_VP2_EV")
+
         template.apply('accessSwitchAndSP-SP-template', vars)
 
+        template.apply('accessSwitchAndSP-template', vars)
+
+        for vlan in range(vlan_ev_start_id, vlan_ev_end_id+1):
+            self.log.info('VLAN: ', vlan)
+            vars.add("VLAN_ID",vlan)
+            template.apply('accessSwitchAndSP_EVIF-template', vars)
+
+        template.apply('accessSwitchAndSP_EVL2VPN-template', vars)
 
     # The pre_modification() and post_modification() callbacks are optional,
     # and are invoked outside FASTMAP. pre_modification() is invoked before

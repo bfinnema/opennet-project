@@ -1,0 +1,56 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$PE_DEVICE}</name>
+      <config>
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <TenGigE-subinterface>
+            <TenGigE>
+              <id>{$PE_INTERFACE}.{$SUBIF_EV}</id>
+              <mode>l2transport</mode>
+              <description>For EVPN-VPWS, SP {$SP_ID}, Access Area {$ACCESS_AREA_ID}, Access Node {$ACCESS_NODE_ID}</description>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$VLAN_ID}</vlan-id>
+                </dot1q>
+              </encapsulation>
+            </TenGigE>
+          </TenGigE-subinterface>
+        </interface>
+      </config>
+    </device>
+    <device>
+      <name>{$POI_DEVICE}</name>
+      <config>
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <!-- interface TenGigE0/0/2/0.500 l2transport
+                description Subscription ISPT-Sub2.2-SERVICE-T4
+                encapsulation dot1q 500 second-dot1q 201-248
+                rewrite ingress tag pop 1 symmetric
+            ! -->
+          <TenGigE-subinterface>
+            <TenGigE>
+              <id>{$TO_SP_IF}.{$SUBIF_EV}</id>
+              <mode>l2transport</mode>
+              <description>For EVPN-VPWS, SP {$SP_ID}, Access Area {$ACCESS_AREA_ID}, Access Node {$ACCESS_NODE_ID}</description>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$S_VLAN}</vlan-id>
+                  <second-dot1q>{$VLAN_ID}</second-dot1q>
+                </dot1q>
+              </encapsulation>
+              <rewrite>
+                <ingress>
+                  <tag>
+                    <pop>1</pop>
+                    <mode>symmetric</mode>
+                  </tag>
+                </ingress>
+              </rewrite>
+            </TenGigE>
+          </TenGigE-subinterface>
+        </interface>
+      </config>
+    </device>
+  </devices>
+</config-template>

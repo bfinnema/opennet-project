@@ -6,6 +6,7 @@ from ncs.application import Service
 # ------------------------
 # OpenNET. Provisioning of a new customer in a CPE. For testing and service assurance.
 # Initial revision February 2019.
+# Updated May 2020 to be able to handle SP BNG. For that case DHCP must be configured in BVI's.
 # ------------------------
 class ServiceCallbacks(Service):
 
@@ -29,10 +30,16 @@ class ServiceCallbacks(Service):
             self.log.info('BRIDGE_ID: ', bridge_id)
             vars.add('BRIDGE_ID', bridge_id)
             template = ncs.template.Template(service)
-            if service.cpe_id == 1:
-                template.apply('newSubCPE1G-template', vars)
+            if service.sp_termination_type == "BNG":
+                if service.cpe_id == 1:
+                    template.apply('newSubCPE1G_BNG-template', vars)
+                else:
+                    template.apply('newSubCPE_BNG-template', vars)
             else:
-                template.apply('newSubCPE-template', vars)
+                if service.cpe_id == 1:
+                    template.apply('newSubCPE1G-template', vars)
+                else:
+                    template.apply('newSubCPE-template', vars)
 
 
     # The pre_modification() and post_modification() callbacks are optional,

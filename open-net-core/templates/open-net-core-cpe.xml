@@ -3,6 +3,7 @@
         <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
         <device>{$DEVICE}</device>
         <cpe_id>{$CPE_ID}</cpe_id>
+        <sp_termination_type>{$SP_TERMINATION_TYPE}</sp_termination_type>
         <vlans>
             <inner_vlan>{$INNER_VLAN}</inner_vlan>
             <outer_vlan>{$OUTER_VLAN}</outer_vlan>

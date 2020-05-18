@@ -1,0 +1,45 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{$DEVICE}</name>
+      <config>
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <TenGigE-subinterface>
+            <TenGigE>
+              <id>{$PE_INTERFACE}</id>
+              <mode>l2transport</mode>
+              <description>Subscription {$SUBSCRIPTION_ID}</description>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{$VLAN_ID}</vlan-id>
+                </dot1q>
+              </encapsulation>
+            </TenGigE>
+          </TenGigE-subinterface>
+        </interface>
+        <l2vpn xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <xconnect>
+            <group>
+              <name>{$SP_ID}-EVPN-VPWS</name>
+              <p2p>
+                <name>{$SP_ID}</name>
+                <interface>
+                  <name>TenGigE{$PE_INTERFACE}</name>
+                </interface>
+                <neighbor-evpn>
+                  <neighbor>
+                    <evpn>
+                      <evi>{$EVI}</evi>
+                      <target>{$TARGET}</target>
+                      <source>{$SOURCE}</source>
+                    </evpn>
+                  </neighbor>
+                </neighbor-evpn>
+              </p2p>
+            </group>
+          </xconnect>
+        </l2vpn>
+      </config>
+    </device>
+  </devices>
+</config-template>

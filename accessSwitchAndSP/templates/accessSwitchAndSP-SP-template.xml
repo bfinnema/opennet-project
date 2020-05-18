@@ -10,7 +10,8 @@
                             <access_nodes>
                                 <access_node_id>{$ACCESS_NODE_ID}</access_node_id>
                                 <access_node_and_sp_service_id>{$ACCESS_NODE_AND_SP_SERVICE_ID}</access_node_and_sp_service_id>
-                                <vlanpool_id>{$VLANPOOL_ID}</vlanpool_id>
+                                <vlanpool_id_pw>{$VLANPOOL_ID_PW}</vlanpool_id_pw>
+                                <vlanpool_id_ev>{$VLANPOOL_ID_EV}</vlanpool_id_ev>
                             </access_nodes>
                         </access_area>
                     </access_deployment>

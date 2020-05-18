@@ -19,6 +19,11 @@ module accessSwitchAndSP {
   description
     "OpenNet. Configuration of Access Switch / SP combination in POI and PE routers";
 
+  revision 2020-04-28 {
+    description
+      "Changed to support EVPN-VPWS in addition to PW as tunnel technology.";
+  }
+
   revision 2019-10-20 {
     description
       "Initial revision.";
@@ -38,9 +43,50 @@ module accessSwitchAndSP {
       uses ncs:service-data;
       ncs:servicepoint accessSwitchAndSP-servicepoint;
 
-      leaf vlanpool_id {
+      container vlanpools {
+        container vlanpool_pw {
+          leaf vlanpool_id_pw {
+            type string;
+          }
+          leaf vlan_pw_start_id {
+            tailf:info "Start of VLAN pool for subscribers on PW tunnel (100-999)";
+            type uint32 {
+              range "100..999";
+            }
+          }
+          leaf vlan_pw_end_id {
+            tailf:info "End of VLAN pool for subscribers on PW tunnel (100-999)";
+            type uint32 {
+              range "100..999";
+            }
+          }
+        }
+        container vlanpool_ev {
+          leaf vlanpool_id_ev {
+            type string;
+          }
+          leaf vlan_ev_start_id {
+            tailf:info "Start of VLAN pool for subscribers on EVPN-VPWS tunnel (100-999)";
+            type uint32 {
+              range "100..999";
+            }
+          }
+          leaf vlan_ev_end_id {
+            tailf:info "End of VLAN pool for subscribers on EVPN-VPWS tunnel (100-999)";
+            type uint32 {
+              range "100..999";
+            }
+          }
+        }
+      }
+
+      /* leaf vlanpool_id_pw {
         type string;
       }
+
+      leaf vlanpool_id_ev {
+        type string;
+      } */
 
       leaf sp_id {
         type leafref {

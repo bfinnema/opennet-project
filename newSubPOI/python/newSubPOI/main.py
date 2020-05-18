@@ -4,10 +4,11 @@ from ncs.application import Service
 
 
 # ------------------------
-# OpenNET. Provisioning of a new customer in a PoI area.
+# OpenNET. Provisioning of a new customer in a PoI area. Using PW between POI and PE
 # Initial revision December 2018.
-# Changed by Bo Finnemann, January 31st: Adding the Remote POI capabilities in order to be able to do service assurance.
-# Changed by Bo Finnemann, February 17th: Adding sp_id in order to do Service Provider bridge group.
+# Changed by Bo Finnemann, January 31st 2019: Adding the Remote POI capabilities in order to be able to do service assurance.
+# Changed by Bo Finnemann, February 17th 2019: Adding sp_id in order to do Service Provider bridge group.
+# Changed by Bo Finnemann, April 4th 2020: SP part removed, so this is a pure POI template
 # ------------------------
 class ServiceCallbacks(Service):
 
@@ -19,28 +20,24 @@ class ServiceCallbacks(Service):
 
         vars = ncs.template.Variables()
         vars.add("DEVICE",service.device)
-        # if service.sp_id == "ISPT":
-        #     vars.add('SP_ID', 'TDC')
-        # else:
-        #     vars.add('SP_ID', service.sp_id)
         vars.add('SP_ID', service.sp_id)
         vars.add('PWESUBINT', service.PWESubInt)
-        vars.add('REMOTEINT', service.remote_interface)
+        # vars.add('REMOTEINT', service.remote_interface)
         vars.add('SUBSCRIPTION_ID', service.subscription_id)
         vars.add('QOS_IN', service.QoS_In)
         vars.add('QOS_OUT', service.QoS_Out)
-        vars.add('S_VLAN', service.s_vlan)
+        # vars.add('S_VLAN', service.s_vlan)
         vars.add('ORIGINAL_S_VLAN', service.original_s_vlan)
         template = ncs.template.Template(service)
         # template.apply('newSubPOI-template', vars)
         for c_vlan in service.c_vlans.c_vlan:
-            remote_interface_id = str(service.remote_interface) + "." + str(service.s_vlan) + str(c_vlan.c_vlan_id)
-            self.log.info('remote_interface_id =', remote_interface_id)
-            bvi_ip_addr = "10." + str(service.cpe_id) + "." + str(c_vlan.c_vlan_id%255) + ".1"
-            self.log.info('bvi_ip_addr =', bvi_ip_addr)
-            vars.add('REMOTE_INT_ID', remote_interface_id)
-            vars.add('BVI_IP_ADDR', bvi_ip_addr)
-            vars.add('C_VLAN_ID', c_vlan.c_vlan_id)
+            # remote_interface_id = str(service.remote_interface) + "." + str(service.s_vlan) + str(c_vlan.c_vlan_id)
+            # self.log.info('remote_interface_id =', remote_interface_id)
+            # bvi_ip_addr = "10." + str(service.cpe_id) + "." + str(c_vlan.c_vlan_id%255) + ".1"
+            # self.log.info('bvi_ip_addr =', bvi_ip_addr)
+            # vars.add('REMOTE_INT_ID', remote_interface_id)
+            # vars.add('BVI_IP_ADDR', bvi_ip_addr)
+            # vars.add('C_VLAN_ID', c_vlan.c_vlan_id)
             vars.add('OLD_C_VLAN_ID', c_vlan.old_c_vlan_id)
             template.apply('newSubPOI-template', vars)
 

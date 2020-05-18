@@ -2,17 +2,17 @@
     <newSubPOI xmlns="http://example.com/newSubPOI">
         <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
         <device>{$DEVICE}</device>
-        <cpe_id>{$CPE_ID}</cpe_id>
-        <sp_id>{$SP_ID}</sp_id>
+        <!-- <cpe_id>{$CPE_ID}</cpe_id> -->
         <PWESubInt>{$PWESUBINT}</PWESubInt>
-        <remote_interface>{$REMOTEINT}</remote_interface>
+        <sp_id>{$SP_ID}</sp_id>
+        <!-- <remote_interface>{$REMOTEINT}</remote_interface> -->
         <QoS_Out>{$QOS_OUT}</QoS_Out>
         <QoS_In>{$QOS_IN}</QoS_In>
-        <s_vlan>{$S_VLAN}</s_vlan>
+        <!-- <s_vlan>{$S_VLAN}</s_vlan> -->
         <original_s_vlan>{$ORIGINAL_S_VLAN}</original_s_vlan>
         <c_vlans>
             <c_vlan>
-                <c_vlan_id>{$C_VLAN}</c_vlan_id>
+                <!-- <c_vlan_id>{$C_VLAN}</c_vlan_id> -->
                 <old_c_vlan_id>{$OLD_C_VLAN}</old_c_vlan_id>
             </c_vlan>
         </c_vlans>

@@ -16,6 +16,11 @@ module newSubCPE {
   description
     "OpenNET. Provisioning of a new customer in the CPE for test and service assurance purposes";
 
+  revision 2020-05-11 {
+    description
+      "Updated to be able to handle sp_termination_type, which can be BNG (new) or Other.";
+  }
+
   revision 2019-02-18 {
     description
       "Initial revision.";
@@ -45,6 +50,14 @@ module newSubCPE {
       type uint32 {
         range "1..20";
       }
+    }
+    leaf sp_termination_type {
+      tailf:info "BNG or not?";
+      type enumeration {
+        enum BNG;
+        enum Other;
+      }
+      default Other;
     }
     list vlans {
       key inner_vlan;

@@ -20,7 +20,6 @@ class ServiceCallbacks(Service):
         vars.add("DEVICE",service.device)
         vars.add('PE_INTERFACE', service.pe_interface)
         vars.add('SUBSCRIPTION_ID', service.subscription_id)
-        # vars.add('SP_ID', service.sp_id)
         vars.add('SP_ID', service.sp_id)
         vars.add('PW_ID', service.pw_id)
         for vlan in service.vlans.vlan:

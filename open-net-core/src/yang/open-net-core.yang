@@ -16,7 +16,7 @@ module open-net-core {
     prefix open-net;
   }
 
-  revision 2019-04-07 {
+  revision 2019-04-19 {
     description
       "Bo Finnemann. The ability to handle moved subscribers is introduced.";
   }
@@ -45,7 +45,7 @@ module open-net-core {
 
       key name;
       leaf name {
-        tailf:info "Internal NSO name";
+        tailf:info "Internal NSO name. Should be the same as Subscription name.";
         tailf:cli-allow-range;
         type string;
       }
@@ -59,10 +59,41 @@ module open-net-core {
         mandatory true;
       }
 
+      leaf tunnel_technology {
+        tailf:info "PW or EVPN?";
+        type enumeration {
+          enum PW;
+          enum EVPN-VPWS;
+        }
+        default PW;
+      }
+
       leaf pwsubinterface_id {
         tailf:info "PW Sub-interface ID, example: 20";
+        tailf:display-when "../tunnel_technology = 'PW'";
         type uint32;
-        mandatory true;
+      }
+
+      container evpn_vpws {
+        tailf:display-when "../tunnel_technology = 'EVPN-VPWS'";
+        leaf evi {
+          tailf:info "EVI (100-999). Example: 540";
+          type uint32 {
+            range "100..999";
+          }
+        }
+        leaf target {
+          tailf:info "EVPN EVI Target (1-99). Example: 40";
+          type uint32 {
+            range "1..999";
+          }
+        }
+        leaf source {
+          tailf:info "EVPN EVI source (1-99). Example: 40";
+          type uint32 {
+            range "1..999";
+          }
+        }
       }
 
       leaf moved_subscriber {
@@ -72,6 +103,7 @@ module open-net-core {
       }
 
       container original_access {
+        tailf:display-when "../moved_subscriber";
         leaf access_area_id {
           tailf:info "The source access area of a moved subscriber. Only needed in case of moving a subscription";
           type leafref {
@@ -84,12 +116,6 @@ module open-net-core {
             path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node/open-net:access_node_id";
           }
         }
-        /* leaf access_if {
-          tailf:info "The source access interface of a moved subscriber. Only needed in case of moving a subscription";
-          type leafref {
-            path "/open-net:open-net-access/open-net:inventory/open-net:access_areas/open-net:access_area[open-net:access_area_id=current()/../access_area_id]/open-net:nodes/open-net:node[open-net:access_node_id=current()/../access_node_id]/open-net:interfaces/open-net:interface/open-net:access_if";
-          }
-        } */
       }
 
       container vlan_mappings {

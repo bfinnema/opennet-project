@@ -1,0 +1,19 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <newSubPOI_EV xmlns="http://example.com/newSubPOI_EV">
+        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+        <device>{$DEVICE}</device>
+        <poi_interface>{$POI_INTERFACE}</poi_interface>
+        <sp_id>{$SP_ID}</sp_id>
+        <QoS_Out>{$QOS_OUT}</QoS_Out>
+        <QoS_In>{$QOS_IN}</QoS_In>
+        <original_s_vlan>{$ORIGINAL_S_VLAN}</original_s_vlan>
+        <evi>{$EVI}</evi>
+        <target>{$POI_TARGET}</target>
+        <source>{$POI_SOURCE}</source>
+        <c_vlans>
+            <c_vlan>
+                <old_c_vlan_id>{$OLD_C_VLAN}</old_c_vlan_id>
+            </c_vlan>
+        </c_vlans>
+    </newSubPOI_EV>
+</config>

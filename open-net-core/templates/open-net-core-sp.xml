@@ -1,0 +1,16 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <newSubSP xmlns="http://example.com/newSubSP">
+        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+        <device>{$DEVICE}</device>
+        <cpe_id>{$CPE_ID}</cpe_id>
+        <remote_interface>{$REMOTEINT}</remote_interface>
+        <sp_id>{$SP_ID}</sp_id>
+        <original_s_vlan>{$ORIGINAL_S_VLAN}</original_s_vlan>
+        <c_vlans>
+            <c_vlan>
+                <c_vlan_id>{$C_VLAN}</c_vlan_id>
+                <old_c_vlan_id>{$OLD_C_VLAN}</old_c_vlan_id>
+            </c_vlan>
+        </c_vlans>
+    </newSubSP>
+</config>

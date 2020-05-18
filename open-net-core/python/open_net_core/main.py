@@ -30,6 +30,7 @@ class ServiceCallbacks(Service):
         vars.add('NAME', service.name)
         subscriber_id = service.subscriber_id
         cpe_id = root.open_net_access.inventory.cpes.cpe[service.cpe_name].cpe_id
+        vars.add("CPE_ID",cpe_id)
         self.log.info('cpe_id: ', cpe_id)
         vars.add('SUBSCRIBER_ID', subscriber_id)
         service_id = service.service_id
@@ -38,15 +39,51 @@ class ServiceCallbacks(Service):
         vars.add('SUBSCRIPTION_ID', subscription_id)
         template.apply('open-net-core-subscribers', vars)
 
-        # INSTANCIATE ACCESS SERVICE
-        # access_device = root.open_net_access.inventory.access_areas.access_area[service.access_area_id].nodes.node[service.access_node_id].access_node_id
-        # access_interface = root.open_net_access.inventory.access_areas.access_area[service.access_area_id].nodes.node[service.access_node_id].interfaces.interface[service.access_if].access_if
+        # Determine SP Termination Type
+        sp_termination_type = root.open_net_access.inventory.sps.sp[sp_id].sp_termination_type
+        self.log.info('SP Termination Type: ', sp_termination_type)
+        vars.add('SP_TERMINATION_TYPE', sp_termination_type)
+
+        # SETTING POI-PE TUNNEL PARAMETERS
+        s_vlan_offset = root.open_net_access.inventory.sps.sp[sp_id].s_vlan_offset   # Example: 500
+        s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.access_area_id].nodes.node[service.access_node_id].s_vlan_num   # Example: 1
+        s_vlan = s_vlan_offset + s_vlan_num   # Example: 501
+        vars.add("S_VLAN",s_vlan)
+        original_s_vlan = s_vlan
+        pw_sub_interface = str(s_vlan) + "." + str(service.pwsubinterface_id)   # Example: 501.20
+        if service.moved_subscriber:
+            original_s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.original_access.access_area_id].nodes.node[service.original_access.access_node_id].s_vlan_num   # Example: 1
+            original_s_vlan = s_vlan_offset + original_s_vlan_num   # Example: 501
+            pw_sub_interface = str(original_s_vlan) + "." + str(service.pwsubinterface_id)   # Example: 501.20
+        vars.add("ORIGINAL_S_VLAN",original_s_vlan)
+
+        pe_base_interface = root.open_net_access.inventory.pe_areas.pe_area[service.pe_area_id].node.pe_if
+        if service.tunnel_technology == "PW":
+            self.log.info('Tunnel Technology PW: ', service.tunnel_technology)
+            pe_pwsubinterface = s_vlan_offset + service.pwsubinterface_id   # Example: 520
+            pe_interface = pe_base_interface + "." + str(pe_pwsubinterface)   # Example: 0/0/0/0.520
+            vars.add("PE_INTERFACE",pe_interface)
+            vars.add("PWESUBINT",pw_sub_interface)
+        elif service.tunnel_technology == "EVPN-VPWS":
+            self.log.info('Tunnel Technology EVPN: ', service.tunnel_technology)
+            pe_interface = pe_base_interface + "." + str(service.evpn_vpws.evi)   # Example: 0/0/0/0.520
+            vars.add("PE_INTERFACE",pe_interface)
+            to_sp_if = root.open_net_access.inventory.poi_areas.poi_area[service.poi_area_id].node.to_sp_if   # Example: 0/0/2/0
+            vars.add('POI_INTERFACE', to_sp_if)
+            vars.add('EVI', service.evpn_vpws.evi)   # Example: 520
+            vars.add('POI_TARGET', service.evpn_vpws.target)
+            vars.add('POI_SOURCE', service.evpn_vpws.source)
+            vars.add('PE_TARGET', service.evpn_vpws.source)
+            vars.add('PE_SOURCE', service.evpn_vpws.target)
+        else:
+            self.log.info('Error in determining tunnel technology: ', service.tunnel_technology)
+
+        # INSTANSIATE ACCESS SERVICE
         access_device = service.access_node_id
         access_interface = service.access_if
         mvr_vlan = root.open_net_access.inventory.sps.sp[service.sp_id].mvr_vlan
         inner_vlans = root.open_net_access.inventory.sps.sp[sp_id].services.service[service.service_id].vlans
         # self.log.info('Inner VLANs: ', inner_vlans[0].vlan)
-        # mvr_receiver_vlan = service.vlan_mappings.vlan_mapping[0].outer_vlan
         for vlan_mapping in service.vlan_mappings.vlan_mapping:
             for vlan in inner_vlans:
                 # self.log.info('Inner VLAN: ', vlan.vlan)
@@ -56,7 +93,6 @@ class ServiceCallbacks(Service):
                     if vlan.multicast:
                         self.log.info('Found Multicast outer vlan: ', vlan_mapping.outer_vlan)
                         mvr_receiver_vlan = vlan_mapping.outer_vlan
-        # mvr_receiver_vlan = root.open_net_access.inventory.sps.sp[service.sp_id].mvr_receiver_vlan
         vars.add("DEVICE",access_device)
         vars.add("INTERFACE",access_interface)
         vars.add("MVR_VLAN",mvr_vlan)
@@ -66,35 +102,16 @@ class ServiceCallbacks(Service):
             vars.add("OUTER_VLAN",vlan_mapping.outer_vlan)
             template.apply('open-net-core-access', vars)
         
-        # INSTANCIATE PoI SERVICE
+        # INSTANSIATE PoI SERVICE
         poi_device = root.open_net_access.inventory.poi_areas.poi_area[service.poi_area_id].node.poi_node_id
-        remote_interface = root.open_net_access.inventory.poi_areas.poi_area[service.poi_area_id].node.poi_if
-        self.log.info('remote_interface: ', remote_interface)
         qos_in = root.open_net_access.inventory.sps.sp[sp_id].services.service[service.service_id].qos_profile_in
-        # qos_in = root.open_net_access.inventory.services.service[service.service_id].qos_profile_in
         qos_out = root.open_net_access.inventory.sps.sp[sp_id].services.service[service.service_id].qos_profile_out
         self.log.info('QoS in and out: ', qos_in, ', ', qos_out)
-        s_vlan_offset = root.open_net_access.inventory.sps.sp[sp_id].s_vlan_offset
-        s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.access_area_id].nodes.node[service.access_node_id].s_vlan_num
-        s_vlan = s_vlan_offset + s_vlan_num
-        original_s_vlan = s_vlan
-        pw_sub_interface = str(s_vlan) + "." + str(service.pwsubinterface_id)
-        if service.moved_subscriber:
-            original_s_vlan_num = root.open_net_access.inventory.access_areas.access_area[service.original_access.access_area_id].nodes.node[service.original_access.access_node_id].s_vlan_num
-            original_s_vlan = s_vlan_offset + original_s_vlan_num
-            pw_sub_interface = str(original_s_vlan) + "." + str(service.pwsubinterface_id)
         vars.add("DEVICE",poi_device)
-        vars.add("CPE_ID",cpe_id)
-        vars.add("PWESUBINT",pw_sub_interface)
-        vars.add("REMOTEINT",remote_interface)
         vars.add("QOS_IN",qos_in)
         vars.add("QOS_OUT",qos_out)
-        vars.add("S_VLAN",s_vlan)
-        vars.add("ORIGINAL_S_VLAN",original_s_vlan)
         for vlan_mapping in service.vlan_mappings.vlan_mapping:
-            # remote_interface_id = remote_interface + "." + s_vlan + vlan_mapping.outer_vlan
-            # vars.add('REMOTE_INT_ID', remote_interface_id)
-            vars.add("C_VLAN",vlan_mapping.outer_vlan)
+            # vars.add("C_VLAN",vlan_mapping.outer_vlan)
             self.log.info('OLD C_VLAN: ', vlan_mapping.old_vlan)
             if not vlan_mapping.old_vlan:
                 old_vlan = vlan_mapping.outer_vlan
@@ -102,16 +119,41 @@ class ServiceCallbacks(Service):
                 old_vlan = vlan_mapping.old_vlan
             vars.add("OLD_C_VLAN",old_vlan)
             self.log.info('OLD C_VLAN now: ', old_vlan)
-            # vars.add("OLD_C_VLAN",vlan_mapping.old_vlan)
-            template.apply('open-net-core-poi', vars)
+            if service.tunnel_technology == "PW":
+                template.apply('open-net-core-poi', vars)
+            elif service.tunnel_technology == "EVPN-VPWS":
+                self.log.info('Does NOT deploy EVPN-VPWS tunnel as it is already there: ', poi_device)
+                # template.apply('open-net-core-poi-ev', vars)
+            else:
+                self.log.info('Error in determining tunnel technology: ', service.tunnel_technology)
         
-        # INSTANCIATE PE SERVICE 
+        # INSTANSIATE SP SERVICE
+        if sp_termination_type != "BNG":
+            self.log.info('SP Termination type is not BNG. Provisioning SP Device. Type: ', sp_termination_type)
+            sp_device = root.open_net_access.inventory.sps.sp[sp_id].node.sp_node_id
+            remote_interface = root.open_net_access.inventory.sps.sp[sp_id].node.sp_if
+            self.log.info('remote_interface, SP: ', remote_interface)
+            vars.add("DEVICE",sp_device)
+            vars.add("REMOTEINT",remote_interface)
+            for vlan_mapping in service.vlan_mappings.vlan_mapping:
+                vars.add("C_VLAN",vlan_mapping.outer_vlan)
+                self.log.info('OLD C_VLAN: ', vlan_mapping.old_vlan)
+                if not vlan_mapping.old_vlan:
+                    old_vlan = vlan_mapping.outer_vlan
+                else:
+                    old_vlan = vlan_mapping.old_vlan
+                vars.add("OLD_C_VLAN",old_vlan)
+                self.log.info('OLD C_VLAN now: ', old_vlan)
+                template.apply('open-net-core-sp', vars)
+        else:
+            self.log.info('SP Termination type is BNG. Does not provision SP Device. Type: ', sp_termination_type)
+        
+        # INSTANSIATE PE SERVICE 
         pe_device = root.open_net_access.inventory.pe_areas.pe_area[service.pe_area_id].node.pe_node_id
-        pe_base_interface = root.open_net_access.inventory.pe_areas.pe_area[service.pe_area_id].node.pe_if
         vars.add("DEVICE",pe_device)
         if service.moved_subscriber:
-            # self.log.info('The subscriber is moved, device: ', pe_device)
-            vars.add("ORIGINAL_S_VLAN",original_s_vlan)
+            self.log.info('The subscriber is moved, device: ', pe_device)
+            # vars.add("ORIGINAL_S_VLAN",original_s_vlan)
             for vlan_mapping in service.vlan_mappings.vlan_mapping:
                 # self.log.info('Outer VLAN: ', vlan_mapping.outer_vlan)
                 # self.log.info('Old Outer VLAN: ', vlan_mapping.old_vlan)
@@ -123,16 +165,19 @@ class ServiceCallbacks(Service):
                 vars.add("PE_INTERFACE",pe_interface_moved)
                 template.apply('open-net-core-pe-moved', vars)
         else:
-            pwsubinterface = s_vlan_offset + service.pwsubinterface_id
-            pe_interface = pe_base_interface + "." + str(pwsubinterface)
-            # self.log.info('The subscriber is NOT! moved, pe_interface: ', pe_interface)
-            vars.add("PE_INTERFACE",pe_interface)
+            self.log.info('The subscriber is NOT! moved, pe_interface: ', pe_device)
             for vlan_mapping in service.vlan_mappings.vlan_mapping:
                 self.log.info('Outer VLAN: ', vlan_mapping.outer_vlan)
                 vars.add("VLAN",vlan_mapping.outer_vlan)
-                template.apply('open-net-core-pe', vars)
+                if service.tunnel_technology == "PW":
+                    template.apply('open-net-core-pe', vars)
+                elif service.tunnel_technology == "EVPN-VPWS":
+                    self.log.info('Does NOT deploy EVPN-VPWS tunnel as it is already there: ', pe_device)
+                    # template.apply('open-net-core-pe-ev', vars)
+                else:
+                    self.log.info('Error in determining tunnel technology: ', service.tunnel_technology)
 
-        # INSTANCIATE CPE SERVICE 
+        # INSTANSIATE CPE SERVICE 
         if cpe_id < 5:
             self.log.info('Deploying CPE part for cpe_id: ', cpe_id)
             vars.add("DEVICE",'cpe-asr920')

@@ -1,0 +1,17 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <newSubPE_EV xmlns="http://example.com/newSubPE_EV">
+        <subscription_id>{$SUBSCRIPTION_ID}</subscription_id>
+        <device>{$DEVICE}</device>
+        <pe_interface>{$PE_INTERFACE}</pe_interface>
+        <sp_id>{$SP_ID}</sp_id>
+        <evi>{$EVI}</evi>
+        <target>{$PE_TARGET}</target>
+        <source>{$PE_SOURCE}</source>
+        <!-- <pw_id>{$S_VLAN}</pw_id> -->
+        <vlans>
+            <vlan>
+                <vlan_id>{$VLAN}</vlan_id>
+            </vlan>
+        </vlans>
+    </newSubPE_EV>
+</config>
